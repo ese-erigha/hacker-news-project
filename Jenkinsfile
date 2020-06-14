@@ -3,8 +3,10 @@ pipeline {
     stages {
         stage('Deploy') {
             steps{
-                sh "bash down.sh"
-                sh "bash up.sh"
+                echo "killing old docker processes"
+                sh "/usr/local/bin/docker-compose rm -fs"
+                echo "building docker containers"
+                sh "/usr/local/bin/docker-compose up --build -d"
             }
         }
     }
