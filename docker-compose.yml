@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
     hacker_news_service:
-        container_name: hacker_news_service #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
         restart: always
         build: ./hacker-news-service
         ports: 
@@ -10,7 +9,7 @@ services:
         command: gunicorn -w 1 -b 0.0.0.0:8000 src.wsgi:app
 
     nginx:
-        container_name: nginx
+        container_name: nginx  #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
         restart: always
         build: ./nginx
         ports: 
