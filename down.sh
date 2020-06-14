@@ -1,2 +1,2 @@
 echo "killing old docker processes"
-docker-compose rm -fs
+sudo docker-compose rm -fs
