@@ -1,2 +1,2 @@
-echo building docker containers
+echo "building docker containers"
 docker-compose up --build -d
