@@ -92,14 +92,14 @@ services:
             - es02
             - es03
 
-    volumes:
-        data01:
-            driver: local
-        data02:
-            driver: local
-        data03:
-            driver: local
+volumes:
+    data01:
+        driver: local
+    data02:
+        driver: local
+    data03:
+        driver: local
 
-    networks:
-        elastic:
-            driver: bridge
+networks:
+    elastic:
+        driver: bridge
