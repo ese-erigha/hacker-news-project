@@ -82,7 +82,7 @@ services:
         image: docker.elastic.co/kibana/kibana:7.8.0
         container_name: kibana
         volumes:
-            - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+            - /config:/usr/share/kibana/config
         environment:
             ELASTICSEARCH_URL: "http://es01:9200"
         ports:
