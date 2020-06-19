@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
     hacker_news_service:
+        container_name: flask_api
         restart: always
         build: ./hacker-news-service
         ports: 
