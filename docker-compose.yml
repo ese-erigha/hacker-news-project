@@ -10,7 +10,7 @@ services:
 
     nginx:
         container_name: nginx  #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
-        restart: always
+        restart: unless-stopped
         build: ./nginx
         ports: 
             - "80:80"
