@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-    hacker_news_service:
+    flask_api:
         container_name: flask_api
         restart: always
         build: ./hacker-news-service
@@ -16,7 +16,7 @@ services:
         ports: 
             - "80:80"
         depends_on: 
-            - hacker_news_service
+            - flask_api
     
     es01:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
