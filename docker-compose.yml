@@ -4,10 +4,35 @@ services:
     flask_api:
         container_name: flask_api #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
         restart: always
-        build: ./hacker-news-service
+        build: ./flask
         ports: 
             - "8000:8000"
-        command: gunicorn -w 1 -b 0.0.0.0:8000 src.wsgi:app
+        depends_on: 
+            - localstack
+        networks:
+            - frontend
+            - backend
+            - elastic
+
+    localstack:
+        image: localstack/localstack
+        container_name: localstack
+        ports:
+            - "4569:4569" # dynamodb port
+            - "9000:9000" #localstack ui port
+        environment:
+            - SERVICES=dynamodb # a list of desired services you want to use.
+            - DEFAULT_REGION=eu-west-1 # This is the region where your localstack mocks to be running
+            - DATA_DIR=/tmp/localstack/data
+            - PORT_WEB_UI=9000
+            - DOCKER_HOST=unix:///var/run/docker.sock
+            - START_WEB=1
+            - DEBUG=1
+        volumes:
+            - "./.localstack:/tmp/localstack"
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        networks:
+            - backend
 
     nginx:
         container_name: nginx
@@ -17,6 +42,8 @@ services:
             - "80:80"
         depends_on: 
             - flask_api
+        networks:
+            - frontend
     
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
@@ -77,4 +104,8 @@ volumes:
 
 networks:
     elastic:
+        driver: bridge
+    frontend:
+        driver: bridge
+    backend:
         driver: bridge
