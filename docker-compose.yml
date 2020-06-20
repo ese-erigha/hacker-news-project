@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
     flask_api:
-        container_name: flask_api
+        container_name: flask_api #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
         restart: always
         build: ./hacker-news-service
         ports: 
@@ -10,23 +10,22 @@ services:
         command: gunicorn -w 1 -b 0.0.0.0:8000 src.wsgi:app
 
     nginx:
-        container_name: nginx  #Do not use when in a swarm; cannot scale a service beyond 1 container if you have specified a custom name
-        restart: unless-stopped
+        container_name: nginx
+        restart: always
         build: ./nginx
         ports: 
             - "80:80"
         depends_on: 
             - flask_api
     
-    es01:
+    elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
-        container_name: es01
-        restart: unless-stopped
+        container_name: elasticsearch
         environment:
-            - node.name=es01
+            - node.name=elasticsearch
             - cluster.name=es-docker-cluster
-            - discovery.seed_hosts=es02,es03
-            - cluster.initial_master_nodes=es01,es02,es03
+            - discovery.seed_hosts=elasticsearch02
+            - cluster.initial_master_nodes=elasticsearch,elasticsearch02
             - bootstrap.memory_lock=true
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
         ulimits:
@@ -36,20 +35,18 @@ services:
         volumes:
             - data01:/usr/share/elasticsearch/data
         ports:
-            - "127.0.0.1:9200:9200" #only accessible within the host; cannot be accessed publicly
+            - "9200:9200" #only accessible within the host; cannot be accessed publicly
         networks:
             - elastic
 
-
-    es02:
+    elasticsearch02:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
-        container_name: es02
-        restart: unless-stopped
+        container_name: elasticsearch02
         environment:
-            - node.name=es02
+            - node.name=elasticsearch02
             - cluster.name=es-docker-cluster
-            - discovery.seed_hosts=es01,es03
-            - cluster.initial_master_nodes=es01,es02,es03
+            - discovery.seed_hosts=elasticsearch
+            - cluster.initial_master_nodes=elasticsearch,elasticsearch02
             - bootstrap.memory_lock=true
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
         ulimits:
@@ -61,48 +58,21 @@ services:
         networks:
             - elastic
 
-
-    # es03:
-    #     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
-    #     container_name: es03
-    #     restart: unless-stopped
-    #     environment:
-    #         - node.name=es03
-    #         - cluster.name=es-docker-cluster
-    #         - discovery.seed_hosts=es01,es02
-    #         - cluster.initial_master_nodes=es01,es02,es03
-    #         - bootstrap.memory_lock=true
-    #         - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    #     ulimits:
-    #         memlock:
-    #             soft: -1
-    #             hard: -1
-    #     volumes:
-    #         - data03:/usr/share/elasticsearch/data
-    #     networks:
-    #         - elastic
-
     kibana:
         image: docker.elastic.co/kibana/kibana:7.8.0
         container_name: kibana
-        restart: unless-stopped
-        # volumes:
-        #     - ./kibana/config:/usr/share/kibana/config
-        environment:
-            ELASTICSEARCH_URL: "http://es01:9200"
         ports:
             - "5601:5601"
+        networks:
+            - elastic
         depends_on:
-            - es01
-            - es02
-            # - es03
+            - elasticsearch
+            - elasticsearch02
 
 volumes:
     data01:
         driver: local
     data02:
-        driver: local
-    data03:
         driver: local
 
 networks:
