@@ -111,7 +111,7 @@ env.bak/
 venv.bak/
 
 #localstack data
-# .localstack/
+.localstack/
 
 # Spyder project settings
 .spyderproject
